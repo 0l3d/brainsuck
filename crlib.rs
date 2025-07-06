@@ -1,15 +1,14 @@
 #![no_std]
-
-use core::slice;
-use core::ffi::{c_void};
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(unused_attributes)]
+#![allow(static_mut_refs)]
+#![allow(dead_code)]
 
 pub type CChar = i8;
 pub type PCChar = *const i8;
 pub type PMutChar = *mut i8;
 pub type Void = core::ffi::c_void;
-pub type PCharA<const N: usize> = [*const i8; N];
-pub const STDOUT: i32 = 1;
-pub const STDIN: i32 = 0;
 
 #[derive(Clone, Copy)]
 pub struct ExecResult {
@@ -18,7 +17,9 @@ pub struct ExecResult {
 }
 
 #[repr(C)]
-pub struct FILE;
+pub struct FILE {
+    _private: [u8; 0],
+}
 
 extern "C" {
     // PRINT
@@ -26,12 +27,10 @@ extern "C" {
     pub fn fprintf(stream: *mut Void, fmt: PCChar, ...) -> i32;
     pub fn sprintf(s: *mut u8, fmt: PCChar, ...) -> i32;
     pub fn snprintf(s: *mut u8, n: usize, fmt: PCChar, ...) -> i32;
-
     // SCAN
     pub fn scanf(fmt: PCChar, ...) -> i32;
     pub fn fscanf(stream: *mut Void, fmt: PCChar, ...) -> i32;
     pub fn sscanf(s: *const u8, fmt: PCChar, ...) -> i32;
-
     // FILE IO
     pub fn fopen(filename: PCChar, mode: PCChar) -> *mut FILE;
     pub fn fgets(buf: PMutChar, n: i32, stream: *mut FILE) -> PMutChar;
@@ -43,16 +42,19 @@ extern "C" {
     pub fn read(fd: usize, buf: *mut u8, count: usize) -> isize;
     pub fn exit(code: i32) -> !;
     pub fn system(command: PCChar) -> i32;
-
     // FILE SYSTEM
     pub fn chdir(path: PCChar) -> i32;
     pub fn getcwd(buf: *mut i8, size: usize) -> PCChar;
-
     // MEMORY
     pub fn malloc(size: usize) -> *mut Void;
     pub fn realloc(ptr: *mut Void, size: usize) -> *mut Void;
     pub fn free(ptr: *mut Void);
-
+    pub fn memset(ptr: *mut u8, value: i32, size: usize) -> *mut u8;
+    pub fn memcpy(dest: *mut u8, src: *const u8, n: usize) -> *mut u8;
+    pub fn memmove(dest: *mut u8, src: *const u8, n: usize) -> *mut u8;
+    pub fn memcmp(s1: *const u8, s2: *const u8, n: usize) -> i32;
+    pub fn memchr(s: *const u8, c: i32, n: usize) -> *mut u8;
+    pub fn calloc(nmemb: usize, size: usize) -> *mut Void;
     // MATH
     pub fn sin(x: f64) -> f64;
     pub fn cos(x: f64) -> f64;
@@ -67,11 +69,15 @@ extern "C" {
     pub fn floor(x: f64) -> f64;
     pub fn ceil(x: f64) -> f64;
     pub fn fabs(x: f64) -> f64;
-
     // TIME
     pub fn time(t: *mut i64) -> i64;
     pub fn sleep(seconds: u32) -> u32;
     pub fn usleep(microseconds: u32) -> i32;
+    // STRING
+    pub fn strlen(s: PCChar) -> usize;
+    pub fn strcmp(s1: PCChar, s2: PCChar) -> i32;
+    pub fn strcpy(dest: PMutChar, src: PCChar) -> PMutChar;
+    pub fn strncpy(dest: PMutChar, src: PCChar, n: usize) -> PMutChar;
 }
 
 pub unsafe fn print(s: PCChar) {
@@ -87,11 +93,14 @@ pub unsafe fn print(s: PCChar) {
 
 pub unsafe fn pwd() -> PCChar {
     static mut BUF: [CChar; 256] = [0; 256];
-    let ptr = getcwd(BUF.as_mut_ptr(), BUF.len());
+    let ptr = getcwd(
+        core::ptr::addr_of_mut!(BUF).cast::<i8>(),
+        BUF.len()
+    );
     if ptr.is_null() {
         return b"<unknown>\0".as_ptr() as PCChar;
     }
-    BUF.as_ptr()
+    core::ptr::addr_of!(BUF).cast::<i8>()
 }
 
 pub unsafe fn uprint(mut n: u32) {
@@ -125,7 +134,6 @@ pub unsafe fn getch() -> u8 {
     }
 }
 
-
 pub unsafe fn exec(command: PCChar) -> i32 {
     system(command)
 }
@@ -136,23 +144,22 @@ pub unsafe fn input() -> [u8; 256] {
     buffer
 }
 
-pub unsafe fn ensure_null_terminated<'a>(
+pub unsafe fn ensure_null_terminated(
     input: *const u8,
     input_len: usize,
-    output: &'a mut [u8],
-) -> Result<PCChar, ()> {
-    if input_len + 1 > output.len() {
-        return Err(());
+    output: *mut u8,
+    output_len: usize,
+) -> PCChar {
+    if input_len + 1 > output_len {
+        return core::ptr::null();
     }
     for i in 0..input_len {
-        output[i] = *input.add(i);
+        *output.add(i) = *input.add(i);
     }
     if input_len == 0 || *input.add(input_len - 1) != 0 {
-        output[input_len] = 0;
-        Ok(output.as_ptr() as PCChar)
-    } else {
-        Ok(output.as_ptr() as PCChar)
+        *output.add(input_len) = 0;
     }
+    output as PCChar
 }
 
 pub unsafe fn cd(path: *const u8) -> i32 {
@@ -169,10 +176,10 @@ pub unsafe fn cd(path: *const u8) -> i32 {
     }
 
     let mut buffer = [0u8; 256];
-    let c_path = match ensure_null_terminated(path, len, &mut buffer) {
-        Ok(cstr) => cstr,
-        Err(_) => return -1,
-    };
+    let c_path = ensure_null_terminated(path, len, buffer.as_mut_ptr(), buffer.len());
+    if c_path.is_null() {
+        return -1;
+    }
 
     chdir(c_path)
 }
@@ -188,18 +195,18 @@ pub unsafe fn splitft(mut input: *const u8) -> Token {
     let mut i = 0;
 
     while *input != 0 && *input != b' ' && i < 63 {
-        WORD[i] = *input;
+        *core::ptr::addr_of_mut!(WORD[i]) = *input;
         input = input.add(1);
         i += 1;
     }
-    WORD[i] = 0;
+    *core::ptr::addr_of_mut!(WORD[i]) = 0;
 
     if *input == b' ' {
         input = input.add(1);
     }
 
     Token {
-        word: WORD.as_ptr(),
+        word: core::ptr::addr_of!(WORD).cast::<u8>(),
         rest: input,
     }
 }

@@ -82,8 +82,8 @@ brainsuck/
 ├── interpreter.rs       # Main interpreter
 ├── examples/
 │   ├── hello.bf         # Hello World example
-│   └── life.bf          # Game of Life example
-│   └── calculator.bf          # Game of Life example
+│   ├── life.bf          # Game of Life example
+│   └── calculator.bf    # Calculator example
 ├── Makefile
 ├── LICENSE.md
 └── README.md

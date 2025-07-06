@@ -64,6 +64,7 @@ Conway's Game of Life cellular automaton simulator with interactive interface.
 ```bash
 ./brainsuck examples/hello.bf
 ./brainsuck examples/life.bf
+./brainsuck examples/calculator.bf
 ```
 
 ## Technical Details
@@ -82,6 +83,7 @@ brainsuck/
 ├── examples/
 │   ├── hello.bf         # Hello World example
 │   └── life.bf          # Game of Life example
+│   └── calculator.bf          # Game of Life example
 ├── Makefile
 ├── LICENSE.md
 └── README.md

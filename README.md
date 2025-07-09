@@ -1,6 +1,6 @@
 # Brainsuck 🧠
 
-A minimalist Brainfuck interpreter written in **Crust** (C-style Rust using `#![no_std]`) with custom `crlib` for C bindings and additional utilities.
+A minimalist Brainfuck interpreter written in **C**
 
 ## Features
 
@@ -9,7 +9,6 @@ A minimalist Brainfuck interpreter written in **Crust** (C-style Rust using `#![
 * ✅ File input/output
 * ✅ Interactive input with `,` command
 * ✅ Proper bracket matching for loops
-* ✅ Built with custom `crlib` for C bindings and additional functions
 
 ## Brainfuck Commands
 
@@ -29,7 +28,7 @@ A minimalist Brainfuck interpreter written in **Crust** (C-style Rust using `#![
 ```bash
 git clone https://github.com/0l3d/brainsuck.git
 cd brainsuck
-make
+gcc -Os brainsuck.c -o brainsuck
 ```
 
 ## Usage
@@ -67,24 +66,15 @@ Conway's Game of Life cellular automaton simulator with interactive interface.
 ./brainsuck examples/calculator.bf
 ```
 
-## Technical Details
-
-* **Language**: Crust (C-style Rust with `#![no_std]`)
-* **Memory**: 30,000 byte cells
-* **Dependencies**: Custom `crlib` for C bindings and additional functions
-* **Architecture**: Uses C bindings instead of standard library
-
 ## Project Structure
 
 ```
 brainsuck/
-├── crlib.rs             # Custom C library bindings
-├── interpreter.rs       # Main interpreter
+├── brainsuck.c          # Main interpreter
 ├── examples/
 │   ├── hello.bf         # Hello World example
 │   ├── life.bf          # Game of Life example
 │   └── calculator.bf    # Calculator example
-├── Makefile
 ├── LICENSE.md
 └── README.md
 ```

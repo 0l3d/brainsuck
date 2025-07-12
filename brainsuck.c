@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 
   while (fgets(line_buf, 256, file) != NULL) {
     int j = 0;
-    while (j < 256 && line_buf[j] != 0 && code_len < 9999) {
+    while (j < 256 && line_buf[j] != 0 && code_len < 99999) {
       code[code_len] = (unsigned char)line_buf[j];
       code_len++;
       j++;

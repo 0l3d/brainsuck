@@ -66,19 +66,6 @@ Conway's Game of Life cellular automaton simulator with interactive interface.
 ./brainsuck examples/calculator.bf
 ```
 
-## Project Structure
-
-```
-brainsuck/
-├── brainsuck.c          # Main interpreter
-├── examples/
-│   ├── hello.bf         # Hello World example
-│   ├── life.bf          # Game of Life example
-│   └── calculator.bf    # Calculator example
-├── LICENSE.md
-└── README.md
-```
-
 ## License
 
 This project is licensed under the **GPL-3.0 License**.

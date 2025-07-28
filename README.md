@@ -4,11 +4,11 @@ A minimalist Brainfuck interpreter written in **C**
 
 ## Features
 
-* ✅ All 8 Brainfuck commands supported
-* ✅ 30,000 memory cells
-* ✅ File input/output
-* ✅ Interactive input with `,` command
-* ✅ Proper bracket matching for loops
+* All 8 Brainfuck commands supported
+* 30,000 memory cells
+* File input/output
+* Interactive input with `,` command
+* Proper bracket matching for loops
 
 ## Brainfuck Commands
 

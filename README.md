@@ -35,7 +35,10 @@ gcc -Os brainsuck.c -o brainsuck
 ## Usage
 
 ```bash
-./brainsuck <brainfuck_file>
+./brainsuck <brainfuck_file> # INTERPRETER
+# or
+./brainsuck <brainfuck_file> -c # INTERPRETER + COMPILER
+# out file name: compiled.brainsuck.asm
 ```
 
 ### Hello World (`hello.bf`)

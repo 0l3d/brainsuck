@@ -55,7 +55,7 @@ void create_fasm(char *code, FILE *out) {
     }
     case ']': {
       if (stack_ptr <= 0) {
-        fprintf(stderr, "Unmatched ] %d\n", i);
+        fprintf(stderr, "Unmatched ]\n");
         return;
       }
       int current_id = loop_stack[--stack_ptr];

@@ -27,7 +27,7 @@ A minimalist Brainfuck interpreter and compiler written in **C**
 ## Installation
 
 ```bash
-git clone https://github.com/0l3d/brainsuck.git
+git clone https://git.sr.ht/~oled/brainsuck
 cd brainsuck
 gcc -Os brainsuck.c -o brainsuck
 ```

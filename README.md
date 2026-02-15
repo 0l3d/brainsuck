@@ -61,4 +61,4 @@ This project is licensed under the **GPL-3.0 License**.
 
 ## Author
 
-Created by **0l3d**.
+Created by **oled**.
